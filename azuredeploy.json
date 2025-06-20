@@ -45,7 +45,9 @@
         "name": "Y1",
         "tier": "Dynamic"
       },
-      "properties": {}
+      "properties": {
+        "reserved": true
+      }
     },
     {
       "type": "Microsoft.Web/sites",
@@ -59,6 +61,7 @@
       ],
       "properties": {
         "siteConfig": {
+          "linuxFxVersion": "Python|3.11",
           "appSettings": [
             {
               "name": "AzureWebJobsStorage",
