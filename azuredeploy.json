@@ -44,6 +44,7 @@
         "name": "Y1",
         "tier": "Dynamic"
       },
+      "kind": "functionapp",
       "properties": {}
     },
     {
@@ -51,6 +52,7 @@
       "apiVersion": "2022-03-01",
       "name": "[parameters('functionAppName')]",
       "location": "[parameters('location')]",
+      "kind": "functionapp",
       "dependsOn": [
         "[resourceId('Microsoft.Web/serverfarms', concat(parameters('functionAppName'), 'plan'))]",
         "[resourceId('Microsoft.Storage/storageAccounts', toLower(concat(parameters('functionAppName'), 'sa')))]"
@@ -59,16 +61,16 @@
         "siteConfig": {
           "appSettings": [
             {
+              "name": "AzureWebJobsStorage",
+              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', toLower(concat(parameters('functionAppName'), 'sa')), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', toLower(concat(parameters('functionAppName'), 'sa'))), '2022-09-01').keys[0].value, ';EndpointSuffix=core.windows.net')]"
+            },
+            {
               "name": "FUNCTIONS_WORKER_RUNTIME",
               "value": "python"
             },
             {
               "name": "FUNCTIONS_EXTENSION_VERSION",
               "value": "~4"
-            },
-            {
-              "name": "AzureWebJobsStorage",
-              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', toLower(concat(parameters('functionAppName'), 'sa')), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', toLower(concat(parameters('functionAppName'), 'sa'))), '2022-09-01').keys[0].value)]"
             },
             {
               "name": "workspaceId",
