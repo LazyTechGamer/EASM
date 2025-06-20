@@ -3,24 +3,31 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "functionAppName": {
-      "type": "string"
-    },
-    "workspaceId": {
-      "type": "string"
-    },
-    "workspaceKey": {
-      "type": "securestring"
+      "type": "string",
+      "defaultValue": "easmenrichfunc"
     },
     "location": {
       "type": "string",
       "defaultValue": "[resourceGroup().location]"
+    },
+    "workspaceId": {
+      "type": "string",
+      "metadata": {
+        "description": "Log Analytics Workspace ID"
+      }
+    },
+    "workspaceKey": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Log Analytics Workspace Primary Key"
+      }
     }
   },
   "resources": [
     {
       "type": "Microsoft.Storage/storageAccounts",
       "apiVersion": "2022-09-01",
-      "name": "[concat(parameters('functionAppName'), 'sa')]",
+      "name": "[toLower(concat(parameters('functionAppName'), 'sa'))]",
       "location": "[parameters('location')]",
       "sku": {
         "name": "Standard_LRS"
@@ -44,13 +51,11 @@
       "apiVersion": "2022-03-01",
       "name": "[parameters('functionAppName')]",
       "location": "[parameters('location')]",
-      "kind": "functionapp",
       "dependsOn": [
-        "[concat('Microsoft.Web/serverfarms/', parameters('functionAppName'), 'plan')]",
-        "[concat('Microsoft.Storage/storageAccounts/', parameters('functionAppName'), 'sa')]"
+        "[resourceId('Microsoft.Web/serverfarms', concat(parameters('functionAppName'), 'plan'))]",
+        "[resourceId('Microsoft.Storage/storageAccounts', toLower(concat(parameters('functionAppName'), 'sa')))]"
       ],
       "properties": {
-        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', concat(parameters('functionAppName'), 'plan'))]",
         "siteConfig": {
           "appSettings": [
             {
@@ -58,8 +63,12 @@
               "value": "python"
             },
             {
+              "name": "FUNCTIONS_EXTENSION_VERSION",
+              "value": "~4"
+            },
+            {
               "name": "AzureWebJobsStorage",
-              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', concat(parameters('functionAppName'), 'sa'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', concat(parameters('functionAppName'), 'sa')), '2022-09-01').keys[0].value)]"
+              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', toLower(concat(parameters('functionAppName'), 'sa')), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', toLower(concat(parameters('functionAppName'), 'sa'))), '2022-09-01').keys[0].value)]"
             },
             {
               "name": "workspaceId",
@@ -70,7 +79,8 @@
               "value": "[parameters('workspaceKey')]"
             }
           ]
-        }
+        },
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', concat(parameters('functionAppName'), 'plan'))]"
       }
     }
   ]
